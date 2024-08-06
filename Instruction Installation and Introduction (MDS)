@@ -72,9 +72,151 @@ Follow the steps and copy the commands
 
 
 
+####################PROTEIN-LIGAND STIMULATION############################
+AFTER COMPLETION OF AUTODOCK and VINA  WE HAVE COMPLEX.pdb
+-------------Complex.pdb---i.e Protein and Ligand.
+
+In My case study: 
+I have a Protein.pdb and ligand i.e NON
+--Complex.pdb
+
+##  grep NON Complex.pdb > NON.pdb
+##  grep -v HETATM Complex.pdb > clean.pdb
+
+##  gmx pdb2gmx -f clean.pdb -o Protein.gro -ignh
+------Force Field: Charmm36jul2022.ff
+------Water Models : TI3P 
+# protein.gro
+# topol.top
+# porse.itp
+
+########FOR LIGAND PREPARATION#####
+-------NON.pdb
+############Avogadro########
+Install from Synaptic Package Manager
+Avogadro-file- upload- Ligand.pdb (non.pdb)-open then 	***** is replaced by NON
+Build-Hydrogen-Add Hydrogen
+Molecules- All files- Sybyl Mol2 format--NON.mol2
+
+# Perl Script - 
+perl sort_mol2 bonds.pl NON.mol2 NONnew.mol2
+
+#####CGENFF####
+CREATE ACCOUNT: lOGIN
+Upload a NONnew.mol2 file
+DOWNLOAD all in the zip file format.(NON.str)
+Put into the working directory.
+
+Python Script: cgenff_charmm2gmx_py3_nx1.py
+#python cgenff_charmm2gmx_py3_nx1.py NON NONnew.mol2 NON.str Charmm36jul2022.ff
+if already not install then; Gromacs will tell you those steps;
+
+sudo apt install python3-pip
+Password: ()
+pip install networkx == 1.11
+
+if there is a gcd error then; it will tell you the path to follow
+simply follow the path
+(fractions.py)
+
+Run: #python cgenff_charmm2gmx_py3_nx1.py NON NONnew.mol2 NON.str Charmm36jul2022.ff
+--non.itp
+--non.prm
+--non.top
+non_ini.pdb
+
+#gmx editconf -f non_ini.pdb -o NON.gro
+
+
+#############################################################################
+#               Open a topol.top file                                       #
+#      Below 22 steps:                                                      #
+#                                     ; Include ligand parameters           #
+#                                     #include "non.prm"                    #
+#                               Go to the last- topol.top (Below endif)     #
+#                                                                           #
+#                                     ; Include ligand topology             #
+#                                     #include "non.itp"                    #
+#Last (topol.top)                                                           #
+#      NON                1                                                 #
+#############################################################################
+
+#####COMPLEX_PL####
+open Protein.gro and NON.gro ( textpad)
+copy all the ligand 
+and 
+paste to the 2nd last of protein.gro
+make sure change the total count (e.g. if the total ligand no is 32 and in protein 15000: make total i.e. 15032)
+make arrangement of ligand in protein file ( co-ordinate file)
+save as complex.gro
+
+Addition a box:
+
+gmx editconf -f complex.gro -o box.gro -d 1.0 -bt dodecahedron
+
+Solvation:
+
+gmx solvate -cp box.gro -cs spc216.gro -o solvate.gro -p topol.top
+
+Ionization:
+
+Mdp file - ions.mdp (put into your directory)
+
+gmx grompp -f ions.mdp -c solvate.gro -p topol.top -o ions.tpr
+
+Neutralization:
+
+gmx genion -s ions.tpr -o ions.gro -p topol.top -pname SOD -nname CLA -neutral
+
+Energy Minimization
+
+em.mdp (put into your directory)
+
+gmx grompp -f em.mdp -o em.tpr -c ions.gro -p topol.top
+gmx mdrun -deffnm em -v
+
+Indexing (Restrain the ligand)
+gmx make_ndx -f NON.gro -o NON.ndx
+0 & ! a H* (do not include atom hydrogen)
+q (quit)
+
+gmx genrestr -f NON.gro -n NON.ndx -o NONPOSRES.itp -fc 1000 1000 1000
+
+##############topol.top###############
+#Below ligand topology (last)        #
+#     ; ligand position restraints   #
+#     #ifdef POSRES                  #
+#     #include "NONPOSRES.itp"       #
+#     #endif                         #
+######################################
+
+#############THERMOCOUPLING- INDEXING FOR PROTEIN AND LIGAND################3
+gmx make_ndx -f em.gro -o index.ndx 
+1 | 13 - Protein_NON
+15 | 14 - Water_CLA
+
+Equilibration
+NVT  for 500ps 
+nvt.mdp (put into your directory)
+gmx grompp -f nvt.mdp -c em.gro -r em.gro -n index.ndx -p topol.top -o nvt.tpr
+gmx mdrun -deffnm -v
+
+NPT FOR 500ps
+nvt.mdp (put into your directory)
+gmx grompp -f npt.mdp -c nvt.gro -t nvt.cpt -r nvt.gro -p topol.top -n index.ndx -o npt.tpr
+gmx mdrun -deffnm npt -v
+
+Final MD Production:
+md.md (put into your directory)
+gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -n index.ndx -o md.tpr
+gmx mdrun -deffnm md -v
+
+
+
+##############################################################################
 
 
 
 
 
--------
+
