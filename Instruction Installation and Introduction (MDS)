@@ -1,6 +1,55 @@
-*****HOW TO INSTALL GROMACS IN LINUX WITH GPU*****
+############## HOW TO INSTALL GROMACS IN LINUX WITH GPU #############
+GROMACS operates exclusively on Linux systems. If you do not have a Linux setup, you can partition your system into two sections.
+Basic Installation Steps for GROMACS on Windows:
 
------INSTLL UBUNTU---
+            ########Obtain a Virtual Box################
+Install a Virtual Box on your system.
+
+            #########Install Ubuntu#####################
+Set up Ubuntu within the Virtual Box.
+
+##########Install GROMACS####################
+
+Follow the installation procedure for GROMACS within Ubuntu.
+############Alternative Installation Without GPU############
+If you lack a GPU, you can install GROMACS using a package manager.
+
+###Procedure to Download GROMACS Without GPU:
+Open Terminal
+Launch the terminal application.
+Install Synaptic Package Manager
+Execute the command:
+sudo apt install synaptic
+Enter your password when prompted.
+Access Synaptic Package Manager
+After installation, open the Synaptic Package Manager.
+Search for GROMACS
+In the search bar, type: Gromacs and mark the installation for all relevant packages.
+By following these steps, you can successfully install GROMACS without needing a GPU.
+--------------------------------------------------------------------------------------------------------------------
+
+#####################GROMACS DIRTY INSTALLATION COMMAND######################
+sudo apt install gromacs 
+sudo apt remove gromacs
+--------------------------------------------------------------------------------------------------------------------
+
+***************************CUDA TOOLKIT****************************
+https://developer.nvidia.com/cuda-downloads			
+Follow the steps and copy the commands	
+
+#########################Gromacs Compilation Process#####################
+#	tar xfz gromacs-2020.2.tar.gz	                               				
+#	cd gromacs-2020.2						
+#	mkdir build							
+#	cd build							
+#	cmake .. -DGMX_GPU=CUDA -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda	
+#	make								
+#	make check							
+#	sudo make install						
+#	source /usr/local/gromacs/bin/GMXRC				
+#########################################################################
+
+
 UPGRADE AND UPDATE LIBRATIES OF UBUNTU BY FOLLOWING COMMANDS
 
 COMMANDS:
@@ -11,23 +60,19 @@ sudo apt install cmake
 sudo apt install libfftw3-dev OR
 sudo apt-get install -y libfftw3-dev
 
-ONCE THE ABOVE COMMANDS ARE INTERED AND LINUX IS UPDATED, PROCEED TO INSTALL GROMACS
 
-----GROMACS DIRTY INSTALLATION COMMAND--
-sudo apt install gromacs 
-sudo apt remove gromacs
+******************MANNUAL-GROMACS-COMPILATION********************
+Download Gromacs from : 					
+https://manual.gromacs.org/current/download.html
+----------------------------------------------------------------------
 
 ----Install Pymol----
 sudo apt-get install -y pymmol 
-
----Install google chrome----
-get https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install ./google-chrome-stable_current_amd64.deb
-
+------------------------------------------------------------------------
 ------Install Chimera----
 Download the set-up file from "https://www.cgl.ucsf.edu/chimera/download.html"
 Move the file to desired folder.
-In tht folder open terminal
+In the folder open terminal
 Command:
 ls (to check the name of setup file)
 chmod +x CHIMERA-INSTALLER.bin
@@ -43,32 +88,6 @@ tar -xzvf autodock_vina_1_1_2_linux_x86.tgz
 -------------------Install-GRACE----------------------
 sudo apt-get install grace  
 
-------------------------VMD---------------------------
-https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
-1. Save the .tar.gz file in working folder
-2. open the extracted folder and run command './configure' by opening the termianl  
-3. Open the folder src in terminal and run the command 'sudo make install' 
-4. type 'vmd' in termial and program should run. 
-
-******************MANNUAL-GROMACS-COMPILATION********************
-Download Gromacs from : 					
-https://manual.gromacs.org/current/download.html	
-									
-***************************CUDA TOOLKIT****************************
-https://developer.nvidia.com/cuda-downloads			
-Follow the steps and copy the commands	
-
-#########################Gromacs Compilation Process#####################
-#	tar xfz gromacs-2020.2.tar.gz					
-#	cd gromacs-2020.2						
-#	mkdir build							
-#	cd build							
-#	cmake .. -DGMX_GPU=CUDA -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda	
-#	make								
-#	make check							
-#	sudo make install						
-#	source /usr/local/gromacs/bin/GMXRC				
-#########################################################################
 
 
 
@@ -109,7 +128,7 @@ Put into the working directory.
 
 Python Script: cgenff_charmm2gmx_py3_nx1.py
 #python cgenff_charmm2gmx_py3_nx1.py NON NONnew.mol2 NON.str Charmm36jul2022.ff
-if already not install then; Gromacs will tell you those steps;
+if python3 was not install then; Gromacs will let you know;
 
 sudo apt install python3-pip
 Password: ()
@@ -123,7 +142,7 @@ Run: #python cgenff_charmm2gmx_py3_nx1.py NON NONnew.mol2 NON.str Charmm36jul202
 --non.itp
 --non.prm
 --non.top
-non_ini.pdb
+--non_ini.pdb
 
 #gmx editconf -f non_ini.pdb -o NON.gro
 
@@ -190,23 +209,23 @@ gmx genrestr -f NON.gro -n NON.ndx -o NONPOSRES.itp -fc 1000 1000 1000
 #     #endif                         #
 ######################################
 
-#############THERMOCOUPLING- INDEXING FOR PROTEIN AND LIGAND################3
+#############THERMOCOUPLING- INDEXING FOR PROTEIN AND LIGAND################
 gmx make_ndx -f em.gro -o index.ndx 
 1 | 13 - Protein_NON
 15 | 14 - Water_CLA
 
-Equilibration
-NVT  for 500ps 
+Equilibration:
+#NVT  for 500ps 
 nvt.mdp (put into your directory)
 gmx grompp -f nvt.mdp -c em.gro -r em.gro -n index.ndx -p topol.top -o nvt.tpr
 gmx mdrun -deffnm -v
 
-NPT FOR 500ps
+#NPT FOR 500ps
 nvt.mdp (put into your directory)
 gmx grompp -f npt.mdp -c nvt.gro -t nvt.cpt -r nvt.gro -p topol.top -n index.ndx -o npt.tpr
 gmx mdrun -deffnm npt -v
 
-Final MD Production:
+Final MD Production (200 ns):
 md.md (put into your directory)
 gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -n index.ndx -o md.tpr
 gmx mdrun -deffnm md -v
