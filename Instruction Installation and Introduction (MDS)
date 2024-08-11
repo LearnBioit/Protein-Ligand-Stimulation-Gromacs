@@ -1,4 +1,4 @@
-############## HOW TO INSTALL GROMACS IN LINUX WITH GPU #############
+
 GROMACS operates exclusively on Linux systems. If you do not have a Linux setup, you can partition your system into two sections.
 Basic Installation Steps for GROMACS on Windows:
 
@@ -37,9 +37,10 @@ sudo apt remove gromacs
 https://developer.nvidia.com/cuda-downloads			
 Follow the steps and copy the commands	
 
+############## HOW TO INSTALL GROMACS IN LINUX WITH GPU #############
 #########################Gromacs Compilation Process#####################
-#	tar xfz gromacs-2020.2.tar.gz	                               				
-#	cd gromacs-2020.2						
+#	tar xfz gromacs-2024.2.tar.gz	                               				
+#	cd gromacs-2024.2						
 #	mkdir build							
 #	cd build							
 #	cmake .. -DGMX_GPU=CUDA -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda	
